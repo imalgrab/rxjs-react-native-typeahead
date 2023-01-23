@@ -4,24 +4,47 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { BehaviorSubject, interval } from 'rxjs';
 import { useSubscription } from './hooks/useSubscription';
 
-const label$ = new BehaviorSubject('');
+const SUGGESTIONS = [
+  'react',
+  'react native',
+  'redux',
+  'redux toolkit',
+  'redux.js',
+  'redux saga',
+  'remix',
+  'reactive extension',
+  'rxjs',
+];
+
+const input$ = new BehaviorSubject('');
 
 export default function App() {
-  const [label, setLabel] = useState('');
-
-  useSubscription(label$.asObservable(), setLabel);
+  const [suggestions, setSuggestions] = useState(SUGGESTIONS);
 
   function handleTextChange(text: string) {
-    label$.next(text);
+    input$.next(text);
   }
+
+  useSubscription(input$, (text) =>
+    setSuggestions(
+      SUGGESTIONS.filter((suggestion) => suggestion.includes(text))
+    )
+  );
+
   return (
     <View style={styles.container}>
       <TextInput
+        autoCapitalize="none"
+        keyboardType="email-address"
         onChangeText={handleTextChange}
         placeholder="Type here..."
         style={styles.input}
       />
-      <Text>Label text: {label}</Text>
+      <View>
+        {suggestions.map((suggestion, i) => (
+          <Text key={`${suggestion}-${i}`}>{suggestion}</Text>
+        ))}
+      </View>
       <StatusBar style="auto" />
     </View>
   );
