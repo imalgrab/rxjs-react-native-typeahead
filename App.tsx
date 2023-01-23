@@ -2,18 +2,14 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { interval } from 'rxjs';
+import { useSubscription } from './hooks/useSubscription';
 
 const value$ = interval(1000);
 
 export default function App() {
   const [value, setValue] = useState<number>();
 
-  useEffect(() => {
-    if (value$) {
-      const subscription = value$.subscribe(setValue);
-      return () => subscription.unsubscribe();
-    }
-  }, []);
+  useSubscription(value$, setValue);
 
   return (
     <View style={styles.container}>
