@@ -28,6 +28,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f862fcb8-829a-4359-899a-4bf5cfb3c49c"
+      }
+    },
+    "owner": "imalgrab"
   }
 }
