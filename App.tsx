@@ -11,25 +11,13 @@ import {
   map,
   switchMap,
 } from 'rxjs';
-import { getAirportsByName } from './api/client';
+import { Airport, getAirportsByName } from './api/client';
 import { useSubscription } from './hooks/useSubscription';
-
-const SUGGESTIONS = [
-  'react',
-  'react native',
-  'redux',
-  'redux toolkit',
-  'redux.js',
-  'redux saga',
-  'remix',
-  'reactive extension',
-  'rxjs',
-];
 
 const input$ = new BehaviorSubject('');
 
 export default function App() {
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Airport[]>([]);
 
   function getAirports(name: string) {
     return from(getAirportsByName(name)).pipe(
@@ -46,8 +34,7 @@ export default function App() {
       debounceTime(300),
       distinctUntilChanged(),
       filter((text) => text.length > 1),
-      switchMap((text) => getAirports(text)),
-      map((airports) => airports.map((airport) => airport.name))
+      switchMap((text) => getAirports(text))
     ),
     (airports) => setSuggestions(airports)
   );
@@ -62,8 +49,10 @@ export default function App() {
         style={styles.input}
       />
       <View>
-        {suggestions.map((suggestion, i) => (
-          <Text key={`${suggestion}-${i}`}>{suggestion}</Text>
+        {suggestions.map((suggestion) => (
+          <Text key={`${suggestion.name}-${suggestion.icao}`}>
+            {suggestion.name} - {suggestion.country}
+          </Text>
         ))}
       </View>
       <StatusBar style="auto" />
