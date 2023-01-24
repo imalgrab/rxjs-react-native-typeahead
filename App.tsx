@@ -1,7 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { BehaviorSubject, interval } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  interval,
+} from 'rxjs';
 import { useSubscription } from './hooks/useSubscription';
 
 const SUGGESTIONS = [
@@ -25,10 +31,16 @@ export default function App() {
     input$.next(text);
   }
 
-  useSubscription(input$, (text) =>
-    setSuggestions(
-      SUGGESTIONS.filter((suggestion) => suggestion.includes(text))
-    )
+  useSubscription(
+    input$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      filter((text) => text.length > 1)
+    ),
+    (text) =>
+      setSuggestions(
+        SUGGESTIONS.filter((suggestion) => suggestion.includes(text))
+      )
   );
 
   return (
