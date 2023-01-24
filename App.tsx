@@ -6,8 +6,12 @@ import {
   debounceTime,
   distinctUntilChanged,
   filter,
+  from,
   interval,
+  map,
+  switchMap,
 } from 'rxjs';
+import { getAirportsByName } from './api/client';
 import { useSubscription } from './hooks/useSubscription';
 
 const SUGGESTIONS = [
@@ -25,7 +29,13 @@ const SUGGESTIONS = [
 const input$ = new BehaviorSubject('');
 
 export default function App() {
-  const [suggestions, setSuggestions] = useState(SUGGESTIONS);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+
+  function getAirports(name: string) {
+    return from(getAirportsByName(name)).pipe(
+      map((airports) => airports.slice(0, 10))
+    );
+  }
 
   function handleTextChange(text: string) {
     input$.next(text);
@@ -35,12 +45,11 @@ export default function App() {
     input$.pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      filter((text) => text.length > 1)
+      filter((text) => text.length > 1),
+      switchMap((text) => getAirports(text)),
+      map((airports) => airports.map((airport) => airport.name))
     ),
-    (text) =>
-      setSuggestions(
-        SUGGESTIONS.filter((suggestion) => suggestion.includes(text))
-      )
+    (airports) => setSuggestions(airports)
   );
 
   return (
